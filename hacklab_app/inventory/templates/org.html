@@ -1,0 +1,17 @@
+<h1>{{ org_name }}</h1>
+{% for item in item_list %}
+    <h3>{{item.name}}</h3>
+    <div>
+        <p>Available: {{item.n_instock}}</p>
+        <p>Total: {{ item.n_loanable}}
+
+    </div>
+    <form>
+        <label for="quantity">Borrow:</label>
+        <div>
+            <!-- Number input box -->
+            <input type="number" id="quantity" name="quantity" value="1" min="1">
+        </div>
+        <button>Request!</button>
+    </form>
+{% endfor %}

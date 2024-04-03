@@ -1,0 +1,8 @@
+{{ user.username }}
+{{ user.email }}
+
+{% for loan in all_loaned %} 
+    <h2>{{loan.item.name}}</h2>
+    <p>{{loan.item.description}}</p>
+    <p>{{loan.item.is_returned}}</p>
+{% endfor %}
