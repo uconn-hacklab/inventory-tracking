@@ -44,7 +44,6 @@ class Organization(models.Model):
     def __str__(self):
         return str(self.name)
 
-
 class Item(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -52,6 +51,7 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    loanable = models.BooleanField(default=True)
     
     @property
     def n_items(self):
@@ -67,7 +67,7 @@ class Item(models.Model):
     def n_borrowed(self):
         """Returns the number of items currently being borrowed"""
         loans = LoanItem.objects.filter(item=self)
-        n_loaned = loans.aggregate(count=Coalesce(Sum('quantity'), 0))['count']
+        n_loaned = loans.aggregate(approved=True, count=Coalesce(Sum('quantity'), 0))['count']
 
         n_returned = loans.aggregate(count=Coalesce(Sum('returns__quantity'), 0))['count']
         return n_loaned - n_returned 
@@ -107,6 +107,13 @@ class ReturnItem(Transaction):
     def __str__(self):
         return f"RETURN: {self.description[0:30]}"
 
+
+class LoanItemManager(models.Manager):
+    def with_returns(self):
+        return self.annotate(n_returned=Coalesce(Sum('returns__quantity'), 0))
+
+
+
 class LoanItem(Transaction):
     # A loan can have transactions that return items
     # TODO ensure that these transactions are only returns
@@ -115,12 +122,10 @@ class LoanItem(Transaction):
     due_date = models.DateField()
     approved = models.BooleanField(default=False)
 
-    @property
+    objects = LoanItemManager()
+
     def n_returned(self) -> int:
-        count = self.returns.aggregate(n_returned=Sum("quantity"))
-        if count.n_returned is None:
-            return 0
-        return count.n_returned
+        return self.returns.aggregate(n_returned=Coalesce(Sum("quantity"), 0))['n_returned']
 
     @property
     def is_returned(self) -> bool:

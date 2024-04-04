@@ -1,8 +1,26 @@
 {{ user.username }}
 {{ user.email }}
 
-{% for loan in all_loaned %} 
+<h1>Waiting approval</h1>
+{% for loan in waiting_approval  %} 
     <h2>{{loan.item.name}}</h2>
-    <p>{{loan.item.description}}</p>
-    <p>{{loan.item.is_returned}}</p>
+    <p><b>Quantity borrowed: </b>{{loan.quantity}}</p>
+    
+    <span><b>Due: </b>{{loan.due_date}}</span>
+{% endfor %}
+
+<h1>Currently loaned</h1>
+{% for loan in on_loan  %} 
+    <h2>{{loan.item.name}}</h2>
+    <p><b>Quantity borrowed: </b>{{loan.quantity}}</p>
+    
+    <span><b>Due: </b>{{loan.due_date}}</span>
+{% endfor %}
+
+<h1>History</h1>
+{% for loan in history  %} 
+    <h2>{{loan.item.name}}</h2>
+    <p><b>Quantity borrowed: </b>{{loan.quantity}}</p>
+    
+    <span><b>Due: </b>{{loan.due_date}}</span>
 {% endfor %}

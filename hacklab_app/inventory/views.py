@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models.query import F
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import FormView, ListView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -46,14 +47,17 @@ class UserLoanInfo(TemplateView, LoginRequiredMixin):
 
     def all_loaned(self):
         # Get all items that have been borrowed ever
-        return LoanItem.objects.filter(recipient=self.request.user) 
+        return  
 
     def get_queryset(self):
         return self.request.user
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['all_loaned'] = self.all_loaned()
+        all_loaned = LoanItem.objects.with_returns().filter(recipient=self.request.user).order_by('-due_date')
+        context['waiting_approval'] = all_loaned.filter(approved=False)
+        context['on_loan'] = all_loaned.filter(approved=True, n_returned__lt=F('quantity')) 
+        context['history'] = all_loaned.filter(approved=True, n_returned=F('quantity'))
         return context
 
 def get_name(request):
