@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Sum
-
+from django.db.models import Sum, manager
+from django.utils.text import slugify
 from django.db.models.functions import Coalesce
 import uuid
 
@@ -31,8 +31,15 @@ class Tag(models.Model):
 
 # An organization that has items that belong to them
 class Organization(models.Model):
-    name = models.CharField(max_length=25, unique=True)
+    name = models.CharField(max_length=25)
     description = models.TextField(null=True, blank=True)
+    slug = models.SlugField(unique=True, max_length=50, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return str(self.name)
@@ -85,17 +92,8 @@ class Transaction(models.Model):
     quantity = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
 
-    approvee = models.ForeignKey(User, related_name="approvee", on_delete=models.PROTECT)
+    approvee = models.ForeignKey(User, null=True, blank=True, related_name="approvee", on_delete=models.PROTECT)
     description = models.TextField()
-
-    def save(self, *args, **kwargs) -> None:
-        user = kwargs.pop('user', None)
-
-        if user and not self.approvee.is_staff:
-            raise PermissionDenied("User must be part of the staff in order to approve a transaction")
-
-        return super().save(*args, **kwargs)
-
 
 class LoseItem(Transaction):
     def __str__(self):
@@ -114,6 +112,8 @@ class LoanItem(Transaction):
     # TODO ensure that these transactions are only returns
     recipient = models.ForeignKey(User, on_delete=models.PROTECT)
     returns = models.ManyToManyField(ReturnItem, blank=True, related_name="return_trans")
+    due_date = models.DateField()
+    approved = models.BooleanField(default=False)
 
     @property
     def n_returned(self) -> int:
@@ -127,6 +127,12 @@ class LoanItem(Transaction):
         return self.n_returned  == self.quantity
 
     def __str__(self):
-        return f"LOAN: {self.description[0:30]}"
+        return f"LOAN Q{self.quantity}: {self.item.name}"
 
-        
+    def save(self, *args, **kwargs):
+        if self.approvee is None and self.approved is True:
+            raise ValidationError("Cannot set approved to true without having an approvee")
+
+        super().save(*args, **kwargs)
+
+

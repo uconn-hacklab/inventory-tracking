@@ -8,7 +8,6 @@ admin.site.register(Building)
 admin.site.register(Room)
 admin.site.register(StorageUnit)
 admin.site.register(Organization)
-admin.site.register(LoanItem)
 
 admin.site.register(ReturnItem)
 admin.site.register(AddItem)
@@ -21,8 +20,15 @@ class ItemAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'n_items', 'n_instock', 'n_borrowed', 'n_lost')
     
 
-@admin.register(Transaction)
+@admin.register(LoanItem)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'quantity', 'date', ) 
     readonly_fields = ()
+    
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_staff:
+            raise PermissionDenied("User must be part of the staff in order to approve a transaction")
+
+        obj.approvee = request.user
+        super().save_model(request, obj, form, change)
 

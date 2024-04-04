@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from inventory.views import UserLoanInfo, OrgInventory
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('org/<slug:slug>/', OrgInventory.as_view()),
+    path('my-info/', UserLoanInfo.as_view()),
 ]

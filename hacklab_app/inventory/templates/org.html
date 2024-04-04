@@ -6,12 +6,10 @@
         <p>Total: {{ item.n_loanable}}
 
     </div>
-    <form>
-        <label for="quantity">Borrow:</label>
-        <div>
-            <!-- Number input box -->
-            <input type="number" id="quantity" name="quantity" value="1" min="1">
-        </div>
-        <button>Request!</button>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="item" value="{{item.uuid}}" />
+        <button type="submit">Submit</button>
     </form>
 {% endfor %}
