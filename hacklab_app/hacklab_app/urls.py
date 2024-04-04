@@ -21,5 +21,5 @@ from inventory.views import UserLoanInfo, OrgInventory
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('org/<slug:slug>/', OrgInventory.as_view()),
-    path('my-info/', UserLoanInfo.as_view()),
+    path('my-info/', UserLoanInfo.as_view(), name="home"),
 ]

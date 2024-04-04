@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+# Datefield input formats
+DATE_INPUT_FORMATS = ['%m-%d-%Y', '%m/%d/%Y','%m-%d-%Y','%m/%d/%y' ]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

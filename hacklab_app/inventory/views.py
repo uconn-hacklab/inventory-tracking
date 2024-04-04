@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import FormView, ListView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 from inventory.forms import ItemForm
 from .models import *
@@ -11,11 +12,11 @@ from .forms import BorrowForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-class OrgInventory(ListView, FormView):
-    context_object_name = "item_list"
+class OrgInventory(FormView):
     form_class = BorrowForm
     template_name = "org.html"
     success_url = "/thanks/"
+    
 
     def get_queryset(self):
         self.org = get_object_or_404(Organization, slug=self.kwargs["slug"])
@@ -23,15 +24,19 @@ class OrgInventory(ListView, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        self.org = get_object_or_404(Organization, slug=self.kwargs["slug"])
+        context['object_list'] = Item.objects.filter(organization=self.org)
         context['org_name'] = self.org.name
         return context
+
 
     def form_valid(self, form):
         loan = form.save(commit=False)
         loan.recipient = self.request.user
         loan.save()
-        return super().form_valid(form)
+        
+        return redirect('home')
+
 
 
 class UserLoanInfo(TemplateView, LoginRequiredMixin):

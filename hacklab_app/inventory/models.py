@@ -89,7 +89,7 @@ class Item(models.Model):
 
 class Transaction(models.Model):
     item = models.ForeignKey('Item', on_delete=models.CASCADE) # which items the user is checking out
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     date = models.DateTimeField(auto_now_add=True)
 
     approvee = models.ForeignKey(User, null=True, blank=True, related_name="approvee", on_delete=models.PROTECT)
