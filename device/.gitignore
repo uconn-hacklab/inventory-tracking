@@ -5,4 +5,4 @@ sdkconfig.old
 compile_commands.json
 
 # Ignore the sample code for the thingmagic api
-include/mercury_api_examples/*
+mercury_api_examples/*

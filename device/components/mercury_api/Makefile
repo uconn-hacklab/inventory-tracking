@@ -1,3 +1,4 @@
+# Check if an embedded platform
 ifeq ($(PLATFORM),EMBEDDED)
 ENDIANNESS = BIG
 include ../arch/ARM/ixp42x/module.mk

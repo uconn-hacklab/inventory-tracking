@@ -258,7 +258,7 @@ extern "C" {
 #define TMR_LLRP_KEEP_ALIVE_TIMEOUT 5000
 
 /** To build API for baremetal plateform. */
-//#define BARE_METAL
+#define BARE_METAL
 
 /**
  * Define this to enable async read using single thread
@@ -294,7 +294,7 @@ Note:To run readsync_baremetal codelet you have to
  ** Run make with TMR_ENABLE_SERIAL_READER_ONLY=1 defined
  ** Add -DTMR_ENABLE_SERIAL_READER_ONLY=1 to your compiler flags
  */ 
-//#define TMR_ENABLE_SERIAL_READER_ONLY
+#define TMR_ENABLE_SERIAL_READER_ONLY
 
 /**
  * Define this to enable support for background reads using native threads.
