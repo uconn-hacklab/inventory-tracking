@@ -1125,7 +1125,7 @@ printPortValueList(TMR_String *string, TMR_PortValueList *list)
   end += sprintf(string->value, "%c", '[');
   for (i = 0; i < list->len && i < list->max; i++)
   {
-    end += sprintf(end, "[%u,%u]%s", list->list[i].port, list->list[i].value,
+    end += sprintf(end, "[%u,%lu]%s", list->list[i].port, list->list[i].value,
       ((i + 1) == list->len) ? "" : ",");
   }
   if (list->len > list->max)
@@ -1181,7 +1181,7 @@ printTagop(TMR_String *string, TMR_TagOp *tagop)
   {
     if (TMR_TAGOP_GEN2_READDATA == tagop->type)
     {
-      end += sprintf(end, ",Op=ReadData:[Bank=%s,WordAddress=%d,Len=%d]",
+      end += sprintf(end, ",Op=ReadData:[Bank=%s,WordAddress=%ld,Len=%d]",
         listname(bankNames, numberof(bankNames),tagop->u.gen2.u.readData.bank),
         tagop->u.gen2.u.readData.wordAddress,
         tagop->u.gen2.u.readData.len);
@@ -1894,7 +1894,7 @@ getSetOneParam(struct TMR_Reader *reader, const char *paramName, TMR_String *str
         ret = TMR_paramGet(reader, param, &value);
         if (TMR_SUCCESS == ret)
         {
-          end += sprintf(end, "%u", value);
+          end += sprintf(end, "%lu", value);
         }
       }
       else
@@ -1972,7 +1972,7 @@ getSetOneParam(struct TMR_Reader *reader, const char *paramName, TMR_String *str
         ret = TMR_paramGet(reader, param, &value);
         if (TMR_SUCCESS == ret)
         {
-          end += sprintf(end, "%x", value);
+          end += sprintf(end, "%lx", value);
         }        
       }
       else
@@ -2284,7 +2284,7 @@ getSetOneParam(struct TMR_Reader *reader, const char *paramName, TMR_String *str
         ret = TMR_paramGet(reader, param, &value);
         if (TMR_SUCCESS == ret)
         {
-          end += sprintf(end, "%d", value);
+          end += sprintf(end, "%ld", value);
         }        
       }
       else
@@ -3041,8 +3041,8 @@ loadConfiguration(struct TMR_Reader *reader, char *filePath, properties *dict, u
 #endif
   end = timeStr;
   time = tmr_gettimestructure();
-  end += sprintf(end, "%d%d%d", time.tm_year, time.tm_mon, time.tm_mday);
-  end += sprintf(end, "_%d%d%d", time.tm_hour, time.tm_min, time.tm_sec);
+  end += sprintf(end, "%ld%ld%ld", time.tm_year, time.tm_mon, time.tm_mday);
+  end += sprintf(end, "_%ld%ld%ld", time.tm_hour, time.tm_min, time.tm_sec);
   strcat(tempFilePath, timeStr);
 
   fp = fopen(tempFilePath, "w");
