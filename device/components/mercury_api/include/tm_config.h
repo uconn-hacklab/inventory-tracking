@@ -435,11 +435,12 @@ Note:To run readsync_baremetal codelet you have to
 
 /** Build the API for both UHF and HF/LF modules only if 'TMR_ENABLE_ALL' is defined */
 #ifdef TMR_ENABLE_ALL
-/** Too build API for HF and LF modules */
+/** To build API for HF and LF modules */
 #define TMR_ENABLE_HF_LF
 
 /** To build API for UHF modules */
 #define TMR_ENABLE_UHF
+
 #endif
 
 #if (defined(TMR_ENABLE_HF_LF) && (!defined(TMR_ENABLE_UHF)))
