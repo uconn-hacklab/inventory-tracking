@@ -6,19 +6,44 @@
  *
 */
 
+#include "esp_err.h"
 #include "tm_reader.h"
 #include "tmr_serial_transport.h"
 
+#include "driver/uart.h"
+#include "driver/gpio.h"
 
 /* Stub implementation of serial transport layer routines. */
+#define RX_BUF_SIZE 256 // bytes
+#define TX_BUF_SIZE 256 // bytes
+#define UART_RX_PIN 3
+#define UART_TX_PIN 1
+
+const uart_port_t uart_num = UART_NUM_0;
+
+/* Note: this->cookie is not used because the handle for the UART is just
+ * an integer */
 
 static TMR_Status
 s_open(TMR_SR_SerialTransport *this)
 {
 
   /* This routine should open the serial connection */
+  uart_config_t uart_config = {
+      .baud_rate = 115200,
+      .data_bits = UART_DATA_8_BITS,
+      .parity = UART_PARITY_DISABLE,
+      .stop_bits = UART_STOP_BITS_1,
+      .flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS,
+      .rx_flow_ctrl_thresh = 122,
+  };
 
-  return TMR_ERROR_UNIMPLEMENTED;
+  int interrupt_alloc_flags = 0;
+  ESP_ERROR_CHECK(uart_driver_install(uart_num, RX_BUF_SIZE, TX_BUF_SIZE, 0, NULL, interrupt_alloc_flags));
+  ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+  ESP_ERROR_CHECK(uart_set_pin(uart_num, UART_TX_PIN, UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+  return TMR_SUCCESS;
 }
 
 
@@ -31,8 +56,12 @@ s_sendBytes(TMR_SR_SerialTransport *this, uint32_t length,
    * the serial connection. If the transmission does not complete in
    * timeoutMs milliseconds, it should return TMR_ERROR_TIMEOUT.
    */
-
-  return TMR_ERROR_UNIMPLEMENTED;
+  int status = uart_write_bytes(uart_num, message, length);
+  if (status == -1) {
+    return TMR_ERROR_TYPE_COMM;
+  } else {
+    return TMR_SUCCESS;
+  }
 }
 
 
@@ -46,8 +75,12 @@ s_receiveBytes(TMR_SR_SerialTransport *this, uint32_t length,
    * message. If the required number of bytes are note received in
    * timeoutMs milliseconds, it should return TMR_ERROR_TIMEOUT.
    */
-
-  return TMR_ERROR_UNIMPLEMENTED;
+  int status = uart_read_bytes(uart_num, message, length, timeoutMs / portTICK_PERIOD_MS);
+  if (status == ESP_FAIL) {
+    return TMR_ERROR_TYPE_COMM;
+  } else {
+    return TMR_SUCCESS;
+  }
 }
 
 
@@ -59,8 +92,11 @@ s_setBaudRate(TMR_SR_SerialTransport *this, uint32_t rate)
    * to the specified rate, or return TMR_ERROR_INVALID if the rate is
    * not supported.
    */
-
-  return TMR_ERROR_UNIMPLEMENTED;
+  if(uart_set_baudrate(uart_num, rate) == ESP_FAIL) {
+    return TMR_ERROR_INVALID;
+  } else {
+    return TMR_SUCCESS;
+  }
 }
 
 
@@ -72,7 +108,12 @@ s_shutdown(TMR_SR_SerialTransport *this)
    * acquired resources.
    */
 
-  return TMR_ERROR_UNIMPLEMENTED;
+
+  if(uart_driver_delete(uart_num) == ESP_FAIL) {
+    return TMR_ERROR_INVALID;
+  } else {
+    return TMR_SUCCESS;
+  }
 }
 
 static TMR_Status
@@ -83,8 +124,11 @@ s_flush(TMR_SR_SerialTransport *this)
    * communication channel. If there are no such buffers, it may do
    * nothing.
    */
-
-  return TMR_ERROR_UNIMPLEMENTED;
+  if(uart_flush_input(uart_num) == ESP_FAIL) {
+    return TMR_ERROR_INVALID;
+  } else {
+    return TMR_SUCCESS;
+  }
 }
 
 
@@ -111,7 +155,7 @@ TMR_SR_SerialTransportDummyInit(TMR_SR_SerialTransport *transport,
    * structure to store the information specific to the transport,
    * such as a file handle or the memory address of the FIFO.
    */
-  transport->cookie = other;
+  transport->cookie = other; // this is unused for ESP32
 
   transport->open = s_open;
   transport->sendBytes = s_sendBytes;

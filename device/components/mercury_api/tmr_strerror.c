@@ -32,6 +32,7 @@
 #include <string.h>
 
 #include "tm_reader.h"
+#include "tmr_strerror.h"
 
 #if defined(TMR_ENABLE_ERROR_STRINGS)
 

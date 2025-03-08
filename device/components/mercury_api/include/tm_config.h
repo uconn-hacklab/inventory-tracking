@@ -391,7 +391,7 @@ Note:To run readsync_baremetal codelet you have to
  */
 #undef  TMR_USE_STRERROR
 
-#endif    /*Bare_metal*/
+#endif    /*BARE_METAL */
 
 #ifdef TMR_ENABLE_GEN2_ONLY
 #undef TMR_ENABLE_ISO180006B
